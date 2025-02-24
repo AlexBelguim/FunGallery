@@ -1,0 +1,14 @@
+{
+    "manifest_version": 3,
+    "name": "Local Video Gallery",
+    "version": "1.0",
+    "description": "Displays a gallery view of videos from a user-selected folder.",
+    "permissions": ["storage","fileSystem", "activeTab"],
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "host_permissions": [
+      "<all_urls>", "file:///*"
+    ]
+  }
+  
