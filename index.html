@@ -1,51 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Video Gallery</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/handyfeeljs@2.0.4/dist/handyfeel.umd.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/controls.css">
+    <link rel="stylesheet" href="styles/script-menu.css">
+    <link rel="stylesheet" href="styles/video-controls.css">
+    <link rel="stylesheet" href="styles/video-grid.css">
+    <link rel="stylesheet" href="styles/video-wrapper.css">
+    <link rel="stylesheet" href="styles/script-modal.css">
 </head>
 <body>
+    <div id="controls">
+        <label id="fileInputLabel" for="fileInput">Choose Folder</label>
+        <input type="file" id="fileInput" webkitdirectory directory multiple>
+        
+        <input type="text" id="handyCodeInput" placeholder="Enter Handy Code" style="margin-left: 10px;">
+        
+        <button id="scriptButton">📜 Script</button>
+        <button id="phoneButton">📱 Phone</button>
+        <button id="pcButton">💻 PC</button>
+        <button id="hateButton">💔 Hated</button>
+        <button id="favButton">⭐ Favorites</button>
 
-    <div class="input-container">
-        <label for="folderInput" class="file-input-label">Choose Folder</label>
-        <input type="file" id="folderInput" webkitdirectory directory multiple/>
-        
-        
-        <input type="text" id="handyCode" placeholder="Enter Handy Code">
-        <button id="saveButton" class="control-btn">Save</button> <!-- Add this line -->
-        <div class="controls-container">
-            <div class="buttons-container">
-                <button id="favBtn" class="control-btn">
-                    <span class="material-icons">star</span>
-                </button>
-                <button id="phoneBtn" class="control-btn">
-                    <span class="material-icons">smartphone</span>
-                </button>
-                <button id="pcBtn" class="control-btn">
-                    <span class="material-icons">computer</span>
-                </button>
-            </div>
-            <div class="slider-container">
-                <span class="material-icons">grid_view</span>
-                <input type="range" id="gridSlider" min="1" max="8" value="3">
-                <span id="sliderValue">3</span>
-            </div>
-        </div>
-        
     </div>
-    <div id="funscriptModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Select a Funscript</h2>
-            <div id="funscriptOptions"></div>
+
+    <div id="videoContainers">
+        <div id="pcContainer" class="video-group">
+            <h2>PC Videos</h2>
+            <div class="video-grid"></div>
+        </div>
+        <div id="phoneContainer" class="video-group">
+            <h2>Phone Videos</h2>
+            <div class="video-grid"></div>
         </div>
     </div>
 
-    <div id="gallery"></div>
-    <script src="script.js"></script>
     <script src="handy.js"></script>
-    <script src="popup.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
-</html> 
+</html>

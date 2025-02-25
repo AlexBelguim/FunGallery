@@ -1,0 +1,23 @@
+#videoContainers {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.video-group {
+    flex: 1;
+    min-width: 0; /* Prevents flex items from overflowing */
+}
+
+.video-group h2 {
+    margin: 0 0 15px 0;
+    padding: 10px;
+    background-color: #424242;
+    border-radius: 5px;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}

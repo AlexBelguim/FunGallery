@@ -1,0 +1,55 @@
+.favorite-button, .handy-button, .hate-button {
+    position: absolute;
+    top: 15px;
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid white;
+}
+
+.handy-button {
+    right: 105px;
+}
+
+.hate-button {
+    right: 60px;
+    width: 40px;
+}
+
+.favorite-button {
+    right: 15px;
+    text-align: center;
+    width: 40px;
+    transition: all 0.2s;
+}
+
+.favorited {
+    background-color: #FFD700;
+    color: #424242;
+}
+
+.funscript-count {
+    color: white;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    cursor: pointer;
+}
+
+.favorite-button:hover {
+    background-color: #FFD700;
+}
+.hate-button:hover {
+    background-color: red;
+}
+
+.hate-button.hated:hover, .favorite-button.favorited:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.hate-button.hated {
+    color: red;
+}
+
+.hated {
+    background-color: red;
+}

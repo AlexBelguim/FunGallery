@@ -1,0 +1,70 @@
+#controls {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #1a1a1a;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: 2px solid #424242;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #424242;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+#fileInput {
+    display: none;
+}
+
+#fileInputLabel {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #424242;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+#fileInputLabel:hover {
+    background-color: #525252;
+}
+
+#handyCodeInput {
+    padding: 10px;
+    border: 2px solid #424242;
+    border-radius: 5px;
+    background-color: transparent;
+    color: white;
+    margin: 5px;
+}
+
+#handyCodeInput::placeholder {
+    color: #888;
+}
+
+#handyCodeInput:focus {
+    outline: none;
+    border-color: #FFD700;
+}
+
+
+
+
+
