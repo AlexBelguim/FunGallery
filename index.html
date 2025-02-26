@@ -163,14 +163,17 @@
 
     </div>
 
-    <div id="videoContainers">
-        <div id="pcContainer" class="video-group">
-            <h2>PC Videos</h2>
-            <div class="video-grid"></div>
-        </div>
-        <div id="phoneContainer" class="video-group">
-            <h2>Phone Videos</h2>
-            <div class="video-grid"></div>
+
+    <div id="mainContent">
+        <div id="videoContainers">
+            <div id="pcContainer" class="video-group">
+                <h2>PC Videos</h2>
+                <div class="video-grid"></div>
+            </div>
+            <div id="phoneContainer" class="video-group">
+                <h2>Phone Videos</h2>
+                <div class="video-grid"></div>
+            </div>
         </div>
     </div>
 
@@ -181,5 +184,29 @@
     <script src="popup.js"></script>
 =======
     <script type="module" src="main.js"></script>
+    <script src="modals/sideBar.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyAgwdjx0_KdP9hxFKR9itv87h8nX59zfPA",
+          authDomain: "fungallery-19fc7.firebaseapp.com",
+          projectId: "fungallery-19fc7",
+          storageBucket: "fungallery-19fc7.firebasestorage.app",
+          messagingSenderId: "926551735801",
+          appId: "1:926551735801:web:812d639a94ba84b00d1128",
+          measurementId: "G-WETPRYK16J"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+      </script>
 </body>
 </html> 
