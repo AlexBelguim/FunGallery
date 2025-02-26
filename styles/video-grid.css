@@ -21,3 +21,66 @@
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
 }
+
+/* Styles for list view mode */
+.video-grid.list-view {
+    display: block; /* Change from grid to block */
+}
+
+/* In list view, only show videos that are explicitly set to display:block */
+.video-grid.list-view .video-wrapper {
+    display: none; /* Hide all by default */
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto 20px;
+}
+
+/* Override for videos that are explicitly shown */
+.video-grid.list-view .video-wrapper[style*="display: block"] {
+    display: block !important;
+}
+
+.video-grid.list-view .video-wrapper video {
+    width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.list-view-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 1000;
+    background-color: rgba(0,0,0,0.7);
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+.list-nav-btn {
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.list-nav-btn:hover {
+    background-color: #444;
+}
+
+.list-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.video-counter {
+    color: white;
+    font-size: 14px;
+    min-width: 60px;
+    text-align: center;
+}

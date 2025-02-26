@@ -3,6 +3,9 @@ body {
     margin: 20px;
     background-color: #1a1a1a;
     color: #ffffff;
+    padding: 0;
+    display: flex;
+    width: 95%;
 }
 
 /* Loading animation */

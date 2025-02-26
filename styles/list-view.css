@@ -1,0 +1,85 @@
+/* List View CSS - styles for the single video view mode */
+
+/* Hide container headings in list view mode */
+body.list-view-active .video-group h2 {
+    display: none;
+}
+
+/* Create a clean single-container layout in list view */
+body.list-view-active #videoContainers {
+    display: block;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+/* Make videos larger in list view */
+body.list-view-active .video-wrapper {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+body.list-view-active .video-wrapper video {
+    width: 100%;
+    max-height: 85vh;
+    object-fit: contain;
+}
+
+/* Add some padding around the video in list view */
+body.list-view-active .video-grid {
+    padding: 0;
+    display: inline;
+}
+
+/* Make the video container take up more space */
+body.list-view-active #mainContent {
+    margin: 20px auto;
+    width: 95%;
+}
+
+/* Make video title larger and centered */
+body.list-view-active .video-wrapper p {
+    font-size: 1.2em;
+    text-align: center;
+    margin: 15px 0;
+}
+
+/* Navigation styles */
+.list-view-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 1000;
+    background-color: rgba(0,0,0,0.7);
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+.list-nav-btn {
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.list-nav-btn:hover {
+    background-color: #444;
+}
+
+.list-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.video-counter {
+    color: white;
+    font-size: 14px;
+    min-width: 60px;
+    text-align: center;
+}

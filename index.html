@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,34 +11,134 @@
     <link rel="stylesheet" href="styles/video-grid.css">
     <link rel="stylesheet" href="styles/video-wrapper.css">
     <link rel="stylesheet" href="styles/script-modal.css">
+    <link rel="stylesheet" href="styles/list-view.css">
 </head>
 <body>
-    <div id="controls">
-        <label id="fileInputLabel" for="fileInput">Choose Folder</label>
-        <input type="file" id="fileInput" webkitdirectory directory multiple>
-        
-        <input type="text" id="handyCodeInput" placeholder="Enter Handy Code" style="margin-left: 10px;">
-        
-        <button id="scriptButton">📜 Script</button>
-        <button id="phoneButton">📱 Phone</button>
-        <button id="pcButton">💻 PC</button>
-        <button id="hateButton">💔 Hated</button>
-        <button id="favButton">⭐ Favorites</button>
+    <div id="sidebar">
+        <div class="sidebar-hint">
+            Press <kbd>Left</kbd> + <kbd>Right</kbd> mouse buttons together to toggle sidebar
+        </div>
+        <div id="controls">
+            <div id="mainControls">   
+                <div class="input-row">
+                    <label id="fileInputLabel" for="fileInput">Choose Folder</label>
+                    <button id="loginButton">🔑 Login</button>
+                </div>
+                <input type="file" id="fileInput" webkitdirectory directory multiple>
+                <input type="text" id="handyCodeInput" placeholder="Enter Handy Code">
+            </div>
+
+            <div class="control-buttons">
+                <div class="category-header">
+                    <div class="category-title">
+                        <span>🔍 Filters</span>
+                    </div>
+                    <span class="category-arrow">▼</span>
+                </div>
+                <div class="filter-buttons">
+                    <button id="scriptButton">📜 Script</button>
+                    <button id="phoneButton">📱 Phone</button>
+                    <button id="pcButton">💻 PC</button>
+                    <button id="listViewButton">📋 List View</button>
+                </div>
+
+                <div class="category-header tag-tittle">
+                    <div class="category-title">
+                        <span>🔍 Tags</span>
+                    </div>
+                    <span class="category-arrow">▼</span>
+                </div>
+                <div class="filter-buttons tag-buttons" id="bin-packing">
+                    <button id="addButton"> + </button>
+                    <button id="hateButton">💔 Hated</button>
+                    <button id="favButton">⭐ Favorites</button>
+                    <div class="filter-buttons tag-buttons bin-packing ">
+                        <button class="tag-btn">🌟 Featured</button>
+                        <button class="tag-btn">New</button>
+                        <button class="tag-btn">Trending</button>
+                        <button class="tag-btn">🔥 Popular</button>
+                        <button class="tag-btn">Long Weekend Specials</button>
+                        <button class="tag-btn">HD</button>
+                        <button class="tag-btn">4K Quality</button>
+                        <button class="tag-btn">Short Clips</button>
+                        <button class="tag-btn">Full Length</button>
+                        <button class="tag-btn">📱 Mobile</button>
+                        <button class="tag-btn">Premium Content</button>
+                        <button class="tag-btn">Free</button>
+                        <button class="tag-btn">Top Rated</button>
+                        <button class="tag-btn">⚡ Quick Access</button>
+                        <button class="tag-btn">Recommended For You</button>
+                        <button class="tag-btn">Recently Added</button>
+                        <button class="tag-btn">Classic</button>
+                        <button class="tag-btn">Behind The Scenes</button>
+                        <button class="tag-btn">VR</button>
+                        <button class="tag-btn">Exclusive Member Content</button>
+                        <button class="tag-btn">🎬 Action</button>
+                        <button class="tag-btn">🎭 Drama</button>
+                        <button class="tag-btn">😂 Comedy</button>
+                        <button class="tag-btn">👻 Horror</button>
+                        <button class="tag-btn">🔍 Mystery</button>
+                        <button class="tag-btn">🤖 Sci-Fi</button>
+                        <button class="tag-btn">🧙‍♂️ Fantasy</button>
+                        <button class="tag-btn">💘 Romance</button>
+                        <button class="tag-btn">🚀 Adventure</button>
+                        <button class="tag-btn">🎵 Musical</button>
+                        <button class="tag-btn">🎮 Gaming</button>
+                        <button class="tag-btn">📚 Educational</button>
+                        <button class="tag-btn">🍿 Blockbuster</button>
+                        <button class="tag-btn">🏆 Award Winning</button>
+                        <button class="tag-btn">🌎 International</button>
+                        <button class="tag-btn">📱 Mobile Friendly</button>
+                        <button class="tag-btn">💻 Desktop</button>
+                        <button class="tag-btn">🔒 Private</button>
+                        <button class="tag-btn">⬇️ Downloadable</button>
+                        <button class="tag-btn">🎧 Audio Enhanced</button>
+                        <button class="tag-btn">👍 Liked</button>
+                        <button class="tag-btn">👎 Disliked</button>
+                        <button class="tag-btn">⏱️ Short Form</button>
+                        <button class="tag-btn">⏳ Long Form</button>
+                        <button class="tag-btn">🔴 Live</button>
+                        <button class="tag-btn">📅 Scheduled</button>
+                        <button class="tag-btn">🔄 Recently Updated</button>
+                        <button class="tag-btn">⭐ Premium</button>
+                        <button class="tag-btn">💰 Paid</button>
+                        <button class="tag-btn">🆓 Free to Watch</button>
+                        <button class="tag-btn">📊 Trending Now</button>
+                        <button class="tag-btn">📈 Rising</button>
+                        <button class="tag-btn">📉 Falling</button>
+                        <button class="tag-btn">🎞️ Classic Cinema</button>
+                        <button class="tag-btn">🆕 Just Added</button>
+                        <button class="tag-btn">🔜 Coming Soon</button>
+                        <button class="tag-btn">📺 TV Series</button>
+                        <button class="tag-btn">🎁 Special Offer</button>
+                        <button class="tag-btn">🏷️ Discounted</button>
+                        <button class="tag-btn">🔥 Hot Topic</button>    
+                    </div>
+                </div>
+
+            
+            </div>
+        </div>
 
     </div>
 
-    <div id="videoContainers">
-        <div id="pcContainer" class="video-group">
-            <h2>PC Videos</h2>
-            <div class="video-grid"></div>
-        </div>
-        <div id="phoneContainer" class="video-group">
-            <h2>Phone Videos</h2>
-            <div class="video-grid"></div>
+
+    <div id="mainContent">
+        <div id="videoContainers">
+            <div id="pcContainer" class="video-group">
+                <h2>PC Videos</h2>
+                <div class="video-grid"></div>
+            </div>
+            <div id="phoneContainer" class="video-group">
+                <h2>Phone Videos</h2>
+                <div class="video-grid"></div>
+            </div>
         </div>
     </div>
 
+    <div id="gallery"></div>
     <script src="handy.js"></script>
     <script type="module" src="main.js"></script>
+    <script type="module" src="modals/sideBar.js"></script>
 </body>
-</html>
+</html> 
