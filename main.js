@@ -1,7 +1,7 @@
 import { HandyManager } from './handyIntegration.js';
 import { FileHandler } from './fileHandler.js';
 import { FilterManager } from './filterManager.js';
-import { createVideoWrapper, setupVideoControls } from './videoControls.js';
+import { createVideoWrapper, setupVideoControls, preloadVideo, logVideoState } from './videoControls.js';
 import { FavoriteManager, ScriptFavoriteManager, HateManager, ScriptHateManager } from './favManager/export.js';
 
 // Initialize managers
@@ -16,34 +16,283 @@ const scriptHateManager = new ScriptHateManager();
 let currentVideoWrapper = null;
 let currentVideo = null;
 
+// Debug flag - set to true to enable verbose logging
+const DEBUG = true;
+
+// Debug logging function
+function debugLog(...args) {
+    if (DEBUG) {
+        console.log(...args);
+    }
+}
+
 function initializeApp() {
+    debugLog('🚀 Initializing app');
     if (document.readyState === 'loading') {
+        debugLog('📄 Document still loading, waiting for DOMContentLoaded');
         document.addEventListener('DOMContentLoaded', startInitialization);
     } else {
+        debugLog('📄 Document already loaded, starting initialization');
         startInitialization();
     }
 }
 
 function startInitialization() {
-    // Load favorites from localStorage
-    const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    favoriteManager.loadFavorites(savedFavorites);
-
-    // Load favorites from LocalStorage
-    const savedHated = JSON.parse(localStorage.getItem('hated') || '[]');
-    hateManager.loadHated(savedHated)
-
-    // Initialize UI elements
-    setupFilterButtons();
-    setupFileInput();
-    setupVideoControls(currentVideo);
-    setupListViewNavigation();
+    debugLog('🏁 Starting app initialization');
     
-    // Add event listener for filtering
-    window.addEventListener('filterVideos', filterVideos);
+    // Setup UI elements
+    setupFileInput();
+    setupFilterButtons();
+    setupListViewNavigation();
+    setupHandyInput();
+    setupVideoControls(currentVideo);
+    
+    // Register event handlers for global state changes
+    window.addEventListener('filterComplete', () => {
+        debugLog('🔍 Filter complete event received');
+        // Additional actions after filtering if needed
+    });
+    
+    // Load saved settings and preferences
+    loadSettings();
+    
+    debugLog('✅ App initialization complete');
+}
+
+function loadSettings() {
+    debugLog('⚙️ Loading saved settings');
+    // Load any saved settings like favorites, filters, etc.
+    // This can be expanded later
+}
+
+function setupFileInput() {
+    debugLog('📂 Setting up file input');
+    const fileInput = document.getElementById('fileInput');
+    
+    fileInput.addEventListener('change', async (event) => {
+        debugLog('📂 File input change event triggered');
+        
+        // Create and show loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.id = 'loading-videos';
+        loadingIndicator.textContent = 'Loading videos...';
+        loadingIndicator.style.position = 'fixed';
+        loadingIndicator.style.top = '50%';
+        loadingIndicator.style.left = '50%';
+        loadingIndicator.style.transform = 'translate(-50%, -50%)';
+        loadingIndicator.style.background = 'rgba(0,0,0,0.7)';
+        loadingIndicator.style.color = 'white';
+        loadingIndicator.style.padding = '20px';
+        loadingIndicator.style.borderRadius = '5px';
+        loadingIndicator.style.zIndex = '9999';
+        document.body.appendChild(loadingIndicator);
+        debugLog('⏳ Added loading indicator to DOM');
+        
+        try {
+            // Process files
+            debugLog('📁 Getting files from input');
+            const files = Array.from(event.target.files || []);
+            debugLog(`📁 Found ${files.length} files`);
+            
+            if (files.length === 0) {
+                debugLog('⚠️ No files selected, removing loading indicator');
+                if (document.body.contains(loadingIndicator)) {
+                    document.body.removeChild(loadingIndicator);
+                }
+                return; // Exit early if no files
+            }
+            
+            debugLog('🔄 Processing files with FileHandler');
+            const startTime = performance.now();
+            const [videos, funscripts] = await FileHandler.getVideosFromFiles(files);
+            const endTime = performance.now();
+            debugLog(`✅ File processing complete in ${(endTime - startTime).toFixed(2)}ms`);
+            debugLog(`📊 Found ${videos.length} videos and ${funscripts.length} funscripts`);
+            
+            // Clear existing videos
+            debugLog('🧹 Clearing existing videos from containers');
+            document.querySelector('#pcContainer .video-grid').innerHTML = '';
+            document.querySelector('#phoneContainer .video-grid').innerHTML = '';
+            
+            // Track loading progress
+            let loadedVideos = 0;
+            const totalVideos = videos.length;
+            debugLog(`📊 Total videos to load: ${totalVideos}`);
+            
+            // Set a maximum wait time (30 seconds) to ensure loading indicator eventually gets removed
+            const maxWaitTime = 30000; // 30 seconds in milliseconds
+            debugLog(`⏱️ Setting loading timeout for ${maxWaitTime}ms`);
+            const loadingTimeout = setTimeout(() => {
+                debugLog('⚠️ Loading timeout reached, forcing completion');
+                if (document.body.contains(loadingIndicator)) {
+                    document.body.removeChild(loadingIndicator);
+                    debugLog('🗑️ Removed loading indicator due to timeout');
+                }
+            }, maxWaitTime);
+            
+            // Function to update loading indicator
+            const updateProgress = () => {
+                loadedVideos++;
+                loadingIndicator.textContent = `Loading videos: ${loadedVideos}/${totalVideos}`;
+                debugLog(`📊 Video loading progress: ${loadedVideos}/${totalVideos}`);
+                
+                if (loadedVideos >= totalVideos) {
+                    // All videos loaded, remove indicator and clear timeout
+                    debugLog('✅ All videos loaded, removing indicator');
+                    clearTimeout(loadingTimeout);
+                    if (document.body.contains(loadingIndicator)) {
+                        document.body.removeChild(loadingIndicator);
+                        debugLog('🗑️ Removed loading indicator after all videos loaded');
+                    }
+                }
+            };
+            
+            // If there are no videos, remove the loading indicator immediately
+            if (totalVideos === 0) {
+                debugLog('⚠️ No videos found, removing loading indicator');
+                clearTimeout(loadingTimeout);
+                if (document.body.contains(loadingIndicator)) {
+                    document.body.removeChild(loadingIndicator);
+                }
+                return;
+            }
+            
+            // Add event listener to track when each video is loaded
+            const videoLoadedListener = (event) => {
+                debugLog(`🎬 Video loaded event: ${event.type} for ${event.target.src}`);
+                updateProgress();
+                // Remove all event listeners to prevent duplicate counts
+                event.target.removeEventListener('canplay', videoLoadedListener);
+                event.target.removeEventListener('loadeddata', videoLoadedListener);
+                event.target.removeEventListener('playing', videoLoadedListener);
+                event.target.removeEventListener('error', videoLoadedListener);
+            };
+            
+            // Add videos to the DOM
+            for (let i = 0; i < videos.length; i++) {
+                const videoData = videos[i];
+                debugLog(`🎬 Creating wrapper for video ${i+1}/${videos.length}: ${videoData.file.name}`);
+                
+                // Make sure videoData exists
+                if (!videoData) {
+                    debugLog(`⚠️ Missing video data for index ${i}, skipping`);
+                    updateProgress(); // Count as loaded to avoid blocking
+                    continue;
+                }
+                
+                try {
+                    // Pass all required parameters to createVideoWrapper
+                    const wrapper = createVideoWrapper(
+                        videoData, 
+                        funscripts, 
+                        favoriteManager, 
+                        handyManager,
+                        scriptFavoriteManager, 
+                        scriptHateManager,
+                        currentVideoWrapper,
+                        currentVideo,
+                        hateManager
+                    );
+                    
+                    // Add event listener to track loading
+                    const videoElement = wrapper.querySelector('video');
+                    if (videoElement) {
+                        debugLog(`🎬 Adding load event listeners for: ${videoData.file.name}`);
+                        // Add multiple event listeners to catch any possible video ready state
+                        videoElement.addEventListener('canplay', videoLoadedListener);
+                        videoElement.addEventListener('loadeddata', videoLoadedListener);
+                        videoElement.addEventListener('playing', videoLoadedListener);
+                        videoElement.addEventListener('error', videoLoadedListener);
+                        
+                        // If video is already in ready state, count it as loaded
+                        if (videoElement.readyState >= 3) { // HAVE_FUTURE_DATA or better
+                            debugLog(`✅ Video already loaded: ${videoData.file.name}`);
+                            updateProgress();
+                        }
+                        
+                        // Log video state for debugging
+                        setTimeout(() => {
+                            logVideoState(videoElement, `Initial state for ${videoData.file.name}`);
+                        }, 500);
+                    } else {
+                        // If no video element found, count it as loaded to avoid blocking
+                        debugLog(`⚠️ No video element found in wrapper for ${videoData?.file?.name || 'unknown'}`);
+                        updateProgress();
+                    }
+                    
+                    // Add to appropriate container based on orientation
+                    debugLog(`📱 Adding video to ${videoData.isPortrait ? 'phone' : 'PC'} container: ${videoData.file.name}`);
+                    if (videoData.isPortrait) {
+                        const phoneContainer = document.querySelector('#phoneContainer .video-grid');
+                        if (phoneContainer) {
+                            phoneContainer.appendChild(wrapper);
+                            debugLog(`✅ Added to phone container: ${videoData.file.name}`);
+                        } else {
+                            debugLog(`⚠️ Phone container not found for: ${videoData.file.name}`);
+                        }
+                    } else {
+                        const pcContainer = document.querySelector('#pcContainer .video-grid');
+                        if (pcContainer) {
+                            pcContainer.appendChild(wrapper);
+                            debugLog(`✅ Added to PC container: ${videoData.file.name}`);
+                        } else {
+                            debugLog(`⚠️ PC container not found for: ${videoData.file.name}`);
+                        }
+                    }
+                } catch (error) {
+                    debugLog(`🔴 Error creating video wrapper for ${videoData?.file?.name || 'unknown'}:`, error);
+                    updateProgress(); // Count as loaded to avoid blocking
+                }
+            }
+            
+            // Apply filters to newly added videos
+            debugLog('🔍 Applying filters to videos');
+            filterVideos();
+            
+            // Add a fallback to ensure the loading indicator is removed
+            // This helps if some videos never fire their load events
+            debugLog('⏱️ Setting fallback for loading indicator removal');
+            setTimeout(() => {
+                if (document.body.contains(loadingIndicator) && loadedVideos < totalVideos) {
+                    debugLog(`⚠️ Fallback: Forcing removal of loading indicator. Loaded ${loadedVideos}/${totalVideos} videos`);
+                    document.body.removeChild(loadingIndicator);
+                }
+            }, Math.min(5000, maxWaitTime / 2)); // Use either 5 seconds or half the max wait time
+            
+        } catch (error) {
+            debugLog('🔴 Error processing files:', error);
+            // Make sure to remove loading indicator if there's an error
+            if (document.body.contains(loadingIndicator)) {
+                document.body.removeChild(loadingIndicator);
+                debugLog('🗑️ Removed loading indicator due to error');
+            }
+        }
+    });
+    
+    debugLog('✅ File input setup complete');
+}
+
+function filterVideos() {
+    debugLog('🔍 Filtering videos');
+    
+    // Get all video wrappers
+    const allWrappers = document.querySelectorAll('.video-wrapper');
+    debugLog(`📊 Found ${allWrappers.length} total video wrappers`);
+    
+    // Get favorite and hate lists
+    const favVideos = favoriteManager.getAllFavorites();
+    const hateVideos = hateManager.getAllHated();
+    debugLog(`⭐ Found ${favVideos.size} favorite videos`);
+    debugLog(`💔 Found ${hateVideos.size} hated videos`);
+    
+    // Apply filtering
+    filterManager.filterVideos(allWrappers, favVideos, hateVideos);
+    debugLog('✅ Filtering complete');
 }
 
 function setupFilterButtons() {
+    debugLog('🔍 Setting up filter buttons');
+    
     const scriptButton = document.getElementById('scriptButton');
     const phoneButton = document.getElementById('phoneButton');
     const pcButton = document.getElementById('pcButton');
@@ -102,65 +351,13 @@ function setupFilterButtons() {
         hateButton.style.color = state.color 
         filterVideos();
     });
-}
-
-function setupFileInput() {
-    const fileInput = document.getElementById('fileInput');
-    fileInput.addEventListener('change', async (event) => {
-        const files = Array.from(event.target.files);
-        const [videos, funscripts] = await FileHandler.getVideosFromFiles(files);
-        
-        // Clear existing videos
-        document.querySelector('#pcContainer .video-grid').innerHTML = '';
-        document.querySelector('#phoneContainer .video-grid').innerHTML = '';
-        
-        for (const videoData of videos) {
-            const wrapper = createVideoWrapper(
-                videoData, 
-                funscripts, 
-                favoriteManager, 
-                handyManager,
-                scriptFavoriteManager, 
-                scriptHateManager, // Add this parameter
-                currentVideoWrapper,
-                currentVideo,
-                hateManager,
-            );
-
-            // Add to appropriate container based on orientation
-            if (videoData.isPortrait) {
-                document.querySelector('#phoneContainer .video-grid').appendChild(wrapper);
-            } else {
-                document.querySelector('#pcContainer .video-grid').appendChild(wrapper);
-            }
-        }
-
-        filterVideos();
-    });
-}
-
-function filterVideos() {
-    const pcVideoWrappers = Array.from(document.querySelectorAll('#pcContainer .video-wrapper'));
-    const phoneVideoWrappers = Array.from(document.querySelectorAll('#phoneContainer .video-wrapper'));
-    const allWrappers = [...pcVideoWrappers, ...phoneVideoWrappers];
     
-    // Convert Sets to Arrays using the spread operator
-    const favoritesArray = [...favoriteManager.favorites];
-    const hatedArray = [...hateManager.hated];
-    
-    filterManager.filterVideos(allWrappers, favoritesArray, hatedArray);
-    
-    // Explicitly trigger list view update if in list view mode
-    if (filterManager.isListView) {
-        setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('listViewUpdate'));
-        }, 50);
-    }
+    debugLog('✅ Filter buttons setup complete');
 }
-
 
 function setupListViewNavigation() {
-    // Create navigation controls
+    debugLog('📋 Setting up list view navigation');
+    
     const navContainer = document.createElement('div');
     navContainer.className = 'list-view-nav';
     navContainer.style.display = 'none';
@@ -182,7 +379,7 @@ function setupListViewNavigation() {
     navContainer.appendChild(nextButton);
     document.body.appendChild(navContainer);
     
-    // Current visible video index
+    // Current video index in list view
     let currentIndex = 0;
     
     // Helper function to get all visible wrappers across containers
@@ -217,6 +414,36 @@ function setupListViewNavigation() {
         console.log(`Found ${allVisibleWrappers.length} videos matching filters`);
         return allVisibleWrappers;
     }
+    
+    // Navigation event handlers
+    prevButton.addEventListener('click', () => {
+        debugLog('📋 List view: Previous button clicked');
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateListView();
+        }
+    });
+    
+    nextButton.addEventListener('click', () => {
+        debugLog('📋 List view: Next button clicked');
+        const allVisibleWrappers = getAllVisibleWrappers();
+        if (currentIndex < allVisibleWrappers.length - 1) {
+            currentIndex++;
+            updateListView();
+        }
+    });
+    
+    // Update the list view nav visibility when toggling list view
+    const listViewToggle = document.getElementById('listViewButton');
+    listViewToggle.addEventListener('click', () => {
+        debugLog(`📋 List view toggled: ${filterManager.isListView}`);
+        toggleListView(filterManager.isListView);
+        listViewNav.style.display = listViewToggle.checked ? 'block' : 'none';
+        
+        // Reset index when entering list view
+        currentIndex = 0;
+        updateListView();
+    });
     
     // Update the active video in list view
     function updateListView() {
@@ -257,7 +484,7 @@ function setupListViewNavigation() {
         prevButton.disabled = currentIndex === 0;
         nextButton.disabled = currentIndex >= allVisibleWrappers.length - 1;
     }
-    
+
     // Function to toggle between list view and grid view
     function toggleListView(isListView) {
         // Show/hide navigation controls
@@ -310,69 +537,47 @@ function setupListViewNavigation() {
         }
     }
     
-    // Button event listeners
-    prevButton.addEventListener('click', () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-            updateListView();
-        }
+    
+    // Listen for filter changes and update list view
+    window.addEventListener('filterComplete', updateListView);
+    
+    debugLog('✅ List view navigation setup complete');
+}
+
+function setupHandyInput() {
+    debugLog('🤖 Setting up Handy input');
+    
+    const handyCodeInput = document.getElementById('handyCodeInput');
+    const storedHandyCode = localStorage.getItem('handyCode');
+    
+    if (storedHandyCode) {
+        handyCodeInput.value = storedHandyCode;
+        debugLog('🤖 Loaded saved Handy code from localStorage');
+    }
+    
+    handyCodeInput.addEventListener('change', () => {
+        localStorage.setItem('handyCode', handyCodeInput.value);
+        debugLog('🤖 Saved Handy code to localStorage');
     });
     
-    nextButton.addEventListener('click', () => {
-        const allVisibleWrappers = getAllVisibleWrappers();
-        
-        if (currentIndex < allVisibleWrappers.length - 1) {
-            currentIndex++;
-            updateListView();
-        }
-    });
-    
-    // Add event listeners for all filter-related events
-    // IMPORTANT: These need to be inside setupListViewNavigation to access updateListView
-    
-    // Listen for the listViewButton clicks
-    const listViewButton = document.getElementById('listViewButton');
-    listViewButton.addEventListener('click', () => {
-        // Toggle list view state is handled in filterButtons setup
-        // Just need to update the UI
-        toggleListView(filterManager.isListView);
-    });
-    
-    // Listen for filter events
-    window.addEventListener('filterComplete', () => {
-        if (filterManager.isListView) {
-            console.log("Filter event captured, updating list view");
-            updateListView();
-        }
-    });
-    
-    // This special event is dispatched by the filterVideos function
-    window.addEventListener('listViewUpdate', () => {
-        if (filterManager.isListView) {
-            updateListView();
-        }
-    });
-    
-    // Also attach event listeners to all filter buttons to ensure we catch changes
-    document.querySelectorAll('#scriptButton, #phoneButton, #pcButton, #favButton, #hateButton').forEach(button => {
-        button.addEventListener('click', () => {
-            if (filterManager.isListView) {
-                // Give a small delay to allow filter processing
-                setTimeout(updateListView, 50);
-            }
-        });
-    });
-    
-    
+    debugLog('✅ Handy input setup complete');
 }
 
 
-// Start initialization
+
+// Set up the application when the script loads
 initializeApp();
 
-// Export functions that might be needed by other modules
-export {
-    filterVideos,
+// Expose global variables for debugging
+window.debugGallery = {
+    favoriteManager,
+    filterManager,
+    handyManager,
+    scriptFavoriteManager,
+    hateManager,
+    scriptHateManager,
     currentVideo,
     currentVideoWrapper
 };
+
+debugLog('🚀 main.js loaded and executed');
