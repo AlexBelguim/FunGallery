@@ -299,6 +299,7 @@ function setupFilterButtons() {
     const favButton = document.getElementById('favButton');
     const hateButton = document.getElementById('hateButton')
     const listViewButton = document.getElementById('listViewButton')
+    const generateButton = document.getElementById('generateButton')
 
     listViewButton.addEventListener('click', () => {
         const isActive = filterManager.toggleMode('isListView');
@@ -307,6 +308,52 @@ function setupFilterButtons() {
         listViewButton.textContent = isActive ? '📋 Grid View' : '📋 List View';
         filterVideos();
     });
+
+    generateButton.addEventListener('click', () => {
+        console.clear()
+        const diffMapSet = new Set()
+        const diffMapArray = new Array()
+        let promptCheck = ''
+        console.log(scriptHateManager.getAllHated())
+
+        scriptHateManager.getAllHated().forEach(x => {
+            diffMapSet.add(x.slice(0, x.indexOf('/')))
+        })  
+        console.log(diffMapSet)
+
+        diffMapSet.forEach(x => {
+            const templist = new Array()
+            scriptHateManager.getAllHated().forEach(y => {
+                if (x == y.slice(0, y.indexOf('/'))) {
+                    templist.push(y.slice(y.indexOf('/') + 1))
+                }
+            }) 
+            diffMapArray.push({Mapname: x, MapList: templist})
+            console.log(diffMapArray)
+        })
+
+        diffMapArray.forEach(x => {
+        
+            let tempString = ''
+            
+            x.MapList.forEach(y => {
+                tempString = tempString + '\n' + "del " + `\"${y}\"`
+            })
+            promptCheck = prompt(x.Mapname + " place file in this map before clicking it \n if you are sure you wan't to clear you storage and create the .bat file type in 'yes'")
+            if (promptCheck == 'yes') {
+                console.log(x.Mapname + " in this map we gonna delete some funscripts")
+                console.log(tempString.replaceAll("/", "\\"))
+                const file = new Blob([tempString.replaceAll("/", "\\") + "\n" + "\n"+ "\n" + cmdScript], {type: 'text/plain'})
+                saveAs(file, "delete.bat")
+            } else {
+                console.log("generated canceled")
+            }
+
+        })  
+
+        promptCheck == "yes" ? scriptHateManager.clearhated() : console.log("script hated not cleared")
+    })
+    
 
     // Keep all other button handlers the same
     scriptButton.addEventListener('click', () => {
@@ -581,3 +628,48 @@ window.debugGallery = {
 };
 
 debugLog('🚀 main.js loaded and executed');
+
+
+const cmdScript = `
+@echo off
+setlocal enabledelayedexpansion
+
+:: Loop through all first-layer subfolders
+for /d %%d in ("*") do (
+    echo Processing subfolder: "%%d"
+    pushd "%%d"
+
+    :: Check if the subfolder contains any nested folders
+    set hasSubfolders=0
+    for /f %%s in ('dir /b /ad 2^>nul') do set hasSubfolders=1
+
+    :: If the subfolder has no nested folders, proceed
+    if !hasSubfolders! equ 0 (
+        set fileCount=0
+
+        :: Count the number of files in the subfolder
+        for /f "delims=" %%f in ('dir /b /a-d 2^>nul') do set /a fileCount+=1
+
+        :: If there is exactly one file, move it to the parent folder and delete the subfolder
+        if !fileCount! equ 1 (
+            echo Subfolder "%%d" has 1 file. Moving file to parent folder...
+            for /f "delims=" %%f in ('dir /b /a-d') do (
+                echo Moving file: "%%f"
+                move "%%f" "..\"
+            )
+            popd
+            echo Deleting subfolder: "%%d"
+            rmdir "%%d"
+            echo Subfolder "%%d" deleted.
+        ) else (
+            echo Subfolder "%%d" has !fileCount! files. No action taken.
+            popd
+        )
+    ) else (
+        echo Subfolder "%%d" contains nested folders. Skipping.
+        popd
+    )
+)
+
+endlocal
+pause`

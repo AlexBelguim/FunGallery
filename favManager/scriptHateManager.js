@@ -1,6 +1,7 @@
 export class ScriptHateManager {
     constructor() {
         this.hatedScripts = new Map();
+        this.STORAGE_KEY = 'scriptHated';
         this.loadHated();
     }
 
@@ -43,5 +44,15 @@ export class ScriptHateManager {
 
     getAllHated() {
         return Array.from(this.hatedScripts.keys());
+    }
+
+    clearhated() {
+        try {
+            this.hatedScripts.clear();
+            localStorage.removeItem(this.STORAGE_KEY);
+            console.log('Cleared all script hated');
+        } catch (error) {
+            console.error('Error clearing script hated:', error);
+        }
     }
 }
